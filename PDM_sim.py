@@ -1,13 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
-import soundfile as sf
+# import soundfile as sf
 from scipy.signal import lfilter, butter
 from IPython.display import Audio
 
 # Параметры симуляции
 fs_audio = 44100            # Частота дискретизации аудио в Гц
-fs_pdm = 3000000           # Частота PDM (10 МГц) - длительность импульса PDM 100 нс
+fs_pdm = 10000000           # Частота PDM (10 МГц) - длительность импульса PDM 100 нс
 fs_optical = 333333333      # Частота оптического канала (333.33 МГц) - импульсы драйвера 3 нс
 duration = 0.01             # Длительность сигнала в секундах (уменьшена для сохранения памяти)
 max_audio_freq = 20000      # Максимальная частота звука в Гц (20 кГц)
