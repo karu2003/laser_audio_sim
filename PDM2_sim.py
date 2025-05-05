@@ -125,11 +125,10 @@ received_signal = photodetector_comparator(optical_signal)
 # RC фильтр для восстановления аудио
 cutoff_freq = 20000  # Частота среза фильтра (20 кГц)
 
-# Используем более совершенный фильтр Баттерворта для сравнения с RC
-# RC фильтр - это фильтр первого порядка
+# RC фильтр
 filtered_signal_rc = rc_filter(received_signal, cutoff_freq, fs)
 
-# Также можно использовать фильтр Баттерворта для лучшего качества
+# фильтр Баттерворта
 order = 2  # Порядок фильтра
 nyquist = 0.5 * fs
 normal_cutoff = cutoff_freq / nyquist
@@ -383,7 +382,7 @@ print(f"SNR для улучшенного PDM (дельта-сигма): {snr_im
 
 # Параметры физической модели лазерной системы
 WAVELENGTH = 905e-9  # Длина волны лазера (905 нм)
-LASER_POWER = 15  # Увеличиваем с 15 Вт до 50 Вт
+LASER_POWER = 65  # Увеличиваем с 15 Вт до 50 Вт
 LASER_DIVERGENCE_ANGLE = 5  # Уменьшаем угол для лучшей концентрации энергии 5
 TRANSMISSION_DISTANCE = 300.0  # Расстояние передачи в метрах
 PULSE_FREQUENCY = fs  # Частота следования импульсов
@@ -400,7 +399,7 @@ laser_transmitter = Transmitter(
 )
 
 # Создание экземпляра фотоприемника
-photodiode_receiver = Receiver.from_photodiode_model("S5973", bias_voltage=-30)
+photodiode_receiver = Receiver.from_photodiode_model("S5973", bias_voltage=-15)
 
 def long_distance_optical_transmission(pdm_signal, t):
     """
@@ -491,9 +490,7 @@ def long_distance_photodetector(optical_signal):
     # Преобразуем оптическую мощность в электрический ток
     sensitivity = photodiode_receiver.get_sensitivity()
     photocurrent = receiver_power * sensitivity
-    
-    # Далее код функции без изменений...
-    
+      
     # Добавляем темновой ток фотодиода
     photocurrent += photodiode_receiver.dark_current
     
@@ -545,7 +542,6 @@ def long_distance_photodetector(optical_signal):
         'background_filter_transmission': background_transmission
     }
 
-# Обновленная основная часть кода
 # PDM кодирование с использованием дельта-сигма модуляции
 pdm_signal = delta_sigma_pdm(audio_signal)
 
@@ -697,7 +693,6 @@ plt.xlim(0, max_audio_freq*1.5)
 plt.figtext(0.5, 0.01, f"Расстояние передачи: {TRANSMISSION_DISTANCE}м", 
             ha="center", fontsize=10, bbox={"facecolor":"orange", "alpha":0.2, "pad":5})
 
-# Используем tight_layout с увеличенным вертикальным отступом
 plt.tight_layout(pad=1.5, h_pad=2.0)
 plt.subplots_adjust(bottom=0.08)  # Дополнительное место внизу для примечания
 # plt.show()
