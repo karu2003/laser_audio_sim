@@ -115,6 +115,35 @@ PHOTODIODE_PRESETS = {
         "wavelength_range": (400e-9, 1100e-9),  # м (400-1100 нм)
         "peak_wavelength": 800e-9,  # м (800 нм)
     },
+    # Лавинные фотодиоды (APD)
+    "C30737MH": {
+        "type": "APD",  # Тип фотодиода
+        "area": 0.115e-6,  # м² 
+        "sensitivity": 60,  # А/Вт при максимальном усилении
+        "quantum_efficiency": 0.83,
+        "dark_current": 1e-9,  # А (1 нА)
+        "noise": "NEP", # Excess Noise Figure
+        "NEP": 1.7e-15,  # W/Hz
+        "max_bias_voltage": 260,  # В
+        "terminal_capacitance": 1e-12,  # Ф (1 пФ)
+        "bandwidth": 0.4e9, # Гц (800 МГц)
+        "wavelength_range": (400e-9, 1100e-9),  # м (400-1100 нм)
+        "peak_wavelength": 900e-9,  # м (800 нм)
+    },
+    "C30724PH": {
+        "type": "APD",  # Тип фотодиода
+        "area": 0.2e-6,  # м² 
+        "sensitivity": 60,  # А/Вт при максимальном усилении
+        "quantum_efficiency": 0.83,
+        "dark_current": 20e-9,  # А (20 нА)
+        "noise": "NEP", # Excess Noise Figure
+        "NEP": 1.7e-15,  # W/Hz
+        "max_bias_voltage": 200,  # В
+        "terminal_capacitance": 1e-12,  # Ф (1 пФ)
+        "bandwidth": 0.4e9, # Гц (800 МГц)
+        "wavelength_range": (400e-9, 1100e-9),  # м (400-1100 нм)
+        "peak_wavelength": 900e-9,  # м (800 нм)
+    },
     # InGaAs фотодиоды для 1550 нм
     "IG26X250S41": {
         "type": "InGaAs",  # Тип фотодиода
@@ -129,5 +158,33 @@ PHOTODIODE_PRESETS = {
         "bandwidth": 2.e6,  # Гц (2 МГц)
         "wavelength_range": (900e-9, 1700e-9),  # м (900-1700 нм)
         "peak_wavelength": 1550e-9,  # м (1550 нм)
+    },
+    "MTD3910W": {
+        "type": "Si",  # Тип фотодиода
+        "area": 1.21e-6,  # м² 
+        "sensitivity": 0.58,  # А/Вт
+        "quantum_efficiency": 0.75,
+        "dark_current": 10e-9,  # А (10 нА)
+        "noise": "NEP",  # W/Hz Noise Equivalent Power
+        "NEP": 1.72e-12, 
+        "max_bias_voltage": 30,  # В
+        "terminal_capacitance": 6e-12,  # Ф (6 пФ)
+        "bandwidth": 0.1e9,
+        "wavelength_range": (400e-9, 1060e-9),  # м (900-1700 нм)
+        "peak_wavelength": 640e-9,  # м (1550 нм)
+    },
+    "MTAPD-06-010": {
+        "type": "APD",  # Тип фотодиода
+        "area": 0.72e-6,  # м² 
+        "sensitivity": 55,  # А/Вт при максимальном усилении
+        "quantum_efficiency": 0.83,
+        "dark_current": 1e-9,  # А (1 нА)
+        "noise": "NEP", # Excess Noise Figure
+        "NEP": 1.82e-12,  # W/Hz
+        "max_bias_voltage": 200,  # В
+        "terminal_capacitance": 1e-12,  # Ф (1 пФ)
+        "bandwidth": 0.583e9, # Гц (583 МГц)
+        "wavelength_range": (400e-9, 1100e-9),  # м (400-1100 нм)
+        "peak_wavelength": 905e-9,  # м (800 нм)
     },
 }

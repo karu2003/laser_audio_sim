@@ -382,8 +382,8 @@ print(f"SNR для улучшенного PDM (дельта-сигма): {snr_im
 
 # Параметры физической модели лазерной системы
 WAVELENGTH = 905e-9  # Длина волны лазера (905 нм)
-LASER_POWER = 65  # Увеличиваем с 15 Вт до 50 Вт
-LASER_DIVERGENCE_ANGLE = 5  # Уменьшаем угол для лучшей концентрации энергии 5
+LASER_POWER = 15  # Увеличиваем с 15 Вт до 50 Вт
+LASER_DIVERGENCE_ANGLE = 14  # Уменьшаем угол для лучшей концентрации энергии 5
 TRANSMISSION_DISTANCE = 300.0  # Расстояние передачи в метрах
 PULSE_FREQUENCY = fs  # Частота следования импульсов
 
@@ -399,7 +399,7 @@ laser_transmitter = Transmitter(
 )
 
 # Создание экземпляра фотоприемника
-photodiode_receiver = Receiver.from_photodiode_model("S5973", bias_voltage=-15)
+photodiode_receiver = Receiver.from_photodiode_model("MTAPD-06-010", bias_voltage=-15) # C30902 S5973 C30737MH MTAPD-06-010
 
 def long_distance_optical_transmission(pdm_signal, t):
     """
@@ -605,7 +605,7 @@ plt.tick_params(labelbottom=False)  # Убираем подписи осей X
 # Фототок
 plt.subplot(9, 1, 4)
 plt.plot(t[:show_samples], reception_results['photocurrent'][:show_samples]*1e9)
-plt.title('Фототок S5973 (нА)')
+plt.title(f'Фототок {photodiode_receiver.name} (нА)')
 plt.grid(True)
 plt.axhline(y=reception_results['background_current']*1e9, color='r', linestyle='--', label='Фоновый ток')
 plt.legend()
