@@ -404,33 +404,38 @@ photodiode_receiver = Receiver.from_photodiode_model("S5973", bias_voltage=-30)
 
 def long_distance_optical_transmission(pdm_signal, t):
     """
-    Моделирует передачу PDM сигнала через оптический канал на большое расстояние.
+    Моделирует передачу PDM сигнала через оптический канал на большое расстояние
+    с учетом сложного атмосферного затухания (например, туман, дождь).
     """
-    # Размер одного бита в наших отсчетах
     bit_samples = int(pulse_duration * fs)
     bit_samples = max(1, bit_samples)
-    
-    # Создаем массив для оптического сигнала
     optical_signal = np.zeros_like(pdm_signal, dtype=float)
-    
-    # Рассчитываем характеристики луча на расстоянии 300 метров
+
+    # Характеристики луча на расстоянии
     power_density = laser_transmitter.get_power_density(TRANSMISSION_DISTANCE)
     beam_radius_parallel, beam_radius_perpendicular = laser_transmitter.get_beam_radius(TRANSMISSION_DISTANCE)
     beam_area = laser_transmitter.get_beam_area(TRANSMISSION_DISTANCE)
-    
-    # Для каждого бита в PDM сигнале
+
+    # --- модель атмосферного затухания ---
+    # Коэффициенты экстинкции (примерные значения, 1/м)
+    alpha_clear = 0.01 / 1000    # Чистый воздух (0.01 1/км)
+    alpha_fog = 0.2 / 1000       # Легкий туман (0.2 1/км)
+    alpha_heavy_fog = 0.5 / 1000 # Сильный туман (0.5 1/км)
+    alpha_rain = 0.1 / 1000      # Дождь (0.1 1/км)
+
+    # Выберите нужный коэффициент затухания
+    alpha = alpha_fog  # Например, легкий туман
+
+    # Экспоненциальное затухание по закону Бугера-Ламберта-Бера
+    atmospheric_attenuation = np.exp(-alpha * TRANSMISSION_DISTANCE)
+
     for i in range(len(pdm_signal)):
         if pdm_signal[i] == 1:
-            # Создаем короткий импульс с учетом мощности лазера и расстояния
             start_idx = i
             end_idx = min(i + bit_samples, len(optical_signal))
-            
-            # Учитываем затухание на больших расстояниях
-            atmospheric_attenuation = np.exp(-0.05 * TRANSMISSION_DISTANCE / 1000)
             actual_power_density = power_density * atmospheric_attenuation
-            
             optical_signal[start_idx:end_idx] = actual_power_density
-    
+
     return optical_signal, {
         'power_density': power_density,
         'beam_radius_parallel': beam_radius_parallel,
@@ -463,8 +468,8 @@ def long_distance_photodetector(optical_signal):
     """
     Моделирует прием сигнала фотодиодом с оптическим фильтром на большом расстоянии.
     """
-    # Фоновая засветка (уменьшена для ночных условий)
-    background_illumination = 5e-7  # Вт/м²
+    # Фоновая засветка для солнечного дня
+    background_illumination = 0.05  # Вт/м² (солнечный день)
     
     # Коэффициенты пропускания для лазера и фоновой засветки
     laser_transmission = optical_filter_transmission(WAVELENGTH)
