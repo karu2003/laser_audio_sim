@@ -6,6 +6,37 @@ def calculate_nep(q, Id, F, R):
     nep = (2 * q * Id * F) ** 0.5 / R
     return nep
 
+def calculate_nep(noise_current_a_per_sqrtHz, responsivity_a_per_w):
+    """
+    Расчёт NEP (Noise Equivalent Power)
+    
+    Parameters:
+        noise_current_a_per_sqrtHz: токовый шум в А/√Гц
+        responsivity_a_per_w: чувствительность в А/Вт
+        
+    Returns:
+        NEP в Вт/√Гц
+    """
+    if responsivity_a_per_w == 0:
+        raise ValueError("Responsivity cannot be zero.")
+    return noise_current_a_per_sqrtHz / responsivity_a_per_w
+
+
+def calculate_bandwidth(t_rise_seconds):
+    """
+    Расчёт полосы пропускания по времени нарастания (формула BW = 0.35 / tr)
+    
+    Parameters:
+        t_rise_seconds: время нарастания в секундах
+        
+    Returns:
+        полоса пропускания в Гц
+    """
+    if t_rise_seconds <= 0:
+        raise ValueError("Rise time must be positive.")
+    return 0.35 / t_rise_seconds
+
+
 # Константы
 q = 1.6e-19      # заряд электрона (Кл)
 Id = 65e-9       # темновой ток (А)
