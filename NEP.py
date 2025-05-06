@@ -46,3 +46,13 @@ R = 0.9          # чувствительность (A/W)
 # Расчет NEP
 nep_result = calculate_nep(q, Id, F, R)
 print(f"NEP для G8931-04: {nep_result:.2e} Вт/√Гц")
+
+noise_current = 1e-12        # 1 пА/√Гц
+responsivity = 0.55          # A/W
+t_rise = 600e-12             # 600 пс
+
+nep = calculate_nep(noise_current, responsivity)
+bw = calculate_bandwidth(t_rise)
+
+print(f"NEP: {nep:.2e} W/√Hz")
+print(f"Bandwidth: {bw/1e6:.2f} MHz")
