@@ -9,7 +9,15 @@ from LiFi_sim import Transmitter, Receiver
 import os
 
 # Параметры симуляции
-fs = 1000000  # Частота дискретизации в Гц (1 МГц)
+# RLD90QZWA -10x
+# Pulse width tw 50 ns
+# Duty ratio DR 0.1 %
+# Driver LMG1025-Q1EVM 3 ns
+
+DR = 0.001
+tw = 3e-9
+# fs = 1000000  # Частота дискретизации в Гц (1 МГц)
+fs =  DR/tw
 duration = 0.05  # Длительность сигнала в секундах
 pulse_duration = 3e-9  # Длительность импульса в секундах (3 нс)
 max_audio_freq = 20000  # Максимальная частота звука в Гц (20 кГц)
@@ -26,16 +34,19 @@ def create_results_folders():
     # Создаем директории для графиков и результатов используя относительные пути
     plots_dir = "./plots"
     results_dir = "./results"
+    ltspice_dir = "./ltspice"
     
     if not os.path.exists(plots_dir):
         os.makedirs(plots_dir)
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
+    if not os.path.exists(ltspice_dir):
+        os.makedirs(ltspice_dir)
     
-    return plots_dir, results_dir
+    return plots_dir, results_dir, ltspice_dir
 
 # Добавьте в конец программы после вывода информации о системе
-plots_dir, results_dir = create_results_folders()
+plots_dir, results_dir, ltspice_dir = create_results_folders()
 
 # Функция для генерации тестового аудио сигнала (сумма синусоид разных частот)
 def generate_audio_signal(t):
@@ -382,8 +393,8 @@ print(f"SNR для улучшенного PDM (дельта-сигма): {snr_im
 
 # Параметры физической модели лазерной системы
 WAVELENGTH = 905e-9  # Длина волны лазера (905 нм)
-LASER_POWER = 15  # Увеличиваем с 15 Вт до 50 Вт
-LASER_DIVERGENCE_ANGLE = 14  # Уменьшаем угол для лучшей концентрации энергии 5
+LASER_POWER = 65  # Увеличиваем с 15 Вт до 50 Вт
+LASER_DIVERGENCE_ANGLE = 5  # Уменьшаем угол для лучшей концентрации энергии 5
 TRANSMISSION_DISTANCE = 300.0  # Расстояние передачи в метрах
 PULSE_FREQUENCY = fs  # Частота следования импульсов
 
@@ -399,7 +410,7 @@ laser_transmitter = Transmitter(
 )
 
 # Создание экземпляра фотоприемника
-photodiode_receiver = Receiver.from_photodiode_model("MTAPD-06-010", bias_voltage=-15) # C30902 S5973 C30737MH MTAPD-06-010
+photodiode_receiver = Receiver.from_photodiode_model("S5973", bias_voltage=-15) # C30902 S5973 C30737MH MTAPD-06-010
 
 def long_distance_optical_transmission(pdm_signal, t):
     """
@@ -752,3 +763,70 @@ save_results_to_txt(results_filename)
 
 print(f"\nГрафики сохранены в директорию: {plots_dir}")
 print(f"Результаты сохранены в файл: {results_filename}")
+
+def save_to_pwl(data, filename, duration, directory='./ltspice'):
+    """
+    Сохраняет данные в формате PWL для использования в LTspice.
+    """
+    # Создаем полный путь к файлу
+    full_path = os.path.join(directory, f"{filename}.txt")
+    
+    # Вычисляем сколько точек нужно для одного периода
+    points_needed = int(duration * fs)
+    
+    # Берем только нужное количество точек из массива данных
+    if len(data) > points_needed:
+        data_to_save = data[:points_needed]
+    else:
+        data_to_save = data
+    
+    # Создаем временную ось только для выбранных точек
+    time_points = np.linspace(0, duration, len(data_to_save))
+    
+    # Открываем файл для записи
+    with open(full_path, 'w') as f:
+        # Записываем заголовок для LTspice
+        f.write("; PWL file for LTspice\n")
+        f.write("; Time(s) Value\n")
+        
+        # Записываем каждую пару время-значение
+        for t, val in zip(time_points, data_to_save):
+            # Форматируем с научной нотацией для точности
+            f.write(f"{t:.9e} {val:.9e}\n")
+    
+    print(f"PWL файл сохранен: {full_path} ({len(data_to_save)} точек, {duration*1000} мс)")
+    return full_path
+
+period_1khz = 0.001  # 1 мс
+
+# Сохраняем фототок для моделирования в LTspice
+photocurrent_file = save_to_pwl(
+    reception_results['photocurrent'], 
+    f"photocurrent_dist_{int(TRANSMISSION_DISTANCE)}m", 
+    period_1khz,  # 50 мкс
+    ltspice_dir
+)
+
+# сохранить напряжение после TIA
+voltage_file = save_to_pwl(
+    reception_results['voltage'], 
+    f"voltage_tia_dist_{int(TRANSMISSION_DISTANCE)}m", 
+    period_1khz, 
+    ltspice_dir
+)
+
+pdm_file = save_to_pwl(
+    pdm_signal,  # Сам PDM сигнал
+    f"pdm_signal_{int(TRANSMISSION_DISTANCE)}m",  # Имя файла
+    period_1khz,  # Длительность сигнала
+    ltspice_dir  # Директория для сохранения
+)
+
+audio_file = save_to_pwl(
+    audio_signal,  # Исходный аудиосигнал
+    f"audio_source_signal",  # Имя файла
+    period_1khz,  # Длительность сигнала
+    ltspice_dir  # Директория для сохранения
+)
+
+print(f"Файлы для LTspice сохранены в директорию: {ltspice_dir}")
